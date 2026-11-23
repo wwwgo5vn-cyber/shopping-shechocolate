@@ -1,0 +1,12 @@
+{
+  "name": "shopping-shechocolate",
+  "private": true,
+  "scripts": {
+    "template": "node scripts/create-template.js",
+    "generate": "node scripts/generate.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "jpeg-js": "^0.4.4"
+  }
+}
