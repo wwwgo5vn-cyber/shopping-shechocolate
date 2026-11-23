@@ -11,10 +11,10 @@
   }
 
   var state = {
-    category: "popular",
+    category: catalog.categories[0],
     query: "",
     searchOpen: false,
-    selectedId: "hat-sen-jar",
+    selectedId: catalog.defaultId || catalog.products[0].id,
     pack: 1,
     qty: 1,
     slide: 0,
@@ -28,6 +28,7 @@
     pulsePacks: false,
     form: { name: "", phone: "", address: "", note: "" },
     formError: "",
+    sending: false,
     keepDetailScroll: false
   };
 
@@ -112,6 +113,10 @@
   function art(product, slide) {
     var mark = esc(L.store.mark);
     var tone = "tone-" + product.tone;
+    if (product.image && slide === 0) {
+      var photoName = L.products[product.id] ? L.products[product.id].name : "";
+      return '<img src="' + esc(product.image) + '" alt="' + esc(photoName) + '">';
+    }
     if (slide === 1) {
       return (
         '<svg class="art ' + tone + '" viewBox="0 0 200 240" role="img">' +
@@ -193,15 +198,15 @@
     }, 1600);
   }
 
-  function shopeeUrl(product) {
-    return "https://shopee.vn/search?keyword=" + encodeURIComponent(product.shopeeQuery);
+  function shopeeUrl() {
+    return window.SHE_ORDER && window.SHE_ORDER.shopeeUrl ? window.SHE_ORDER.shopeeUrl : "";
   }
 
   function renderHeader() {
     var count = cartCount();
     var search = state.searchOpen
       ? '<input id="search" class="search-input" type="search" placeholder="' + esc(L.header.searchPlaceholder) + '" value="' + esc(state.query) + '" />'
-      : '<h1 class="topbar-title">' + esc(L.store.name) + "</h1>";
+      : '<h1 class="topbar-title"><img class="brand-logo brand-logo-on-bar" src="images/logo-she.png" alt="' + esc(L.store.name) + '"></h1>';
     return (
       '<header class="topbar">' +
       '<button class="icon-btn" type="button" data-action="back" aria-label="' + esc(L.header.back) + '">' + icon("back") + "</button>" +
@@ -216,7 +221,7 @@
   function renderStore() {
     return (
       '<div class="cover"></div><section class="store-card">' +
-      '<div class="logo">' + esc(L.store.mark) + "</div>" +
+      '<div class="logo"><img class="brand-logo" src="images/logo-she.png" alt="' + esc(L.store.name) + '"></div>' +
       "<h2 class=\"store-name\">" + esc(L.store.name) + "</h2>" +
       '<p class="muted">' + esc(L.store.kind) + " · " + esc(L.store.area) + "</p>" +
       '<p class="muted">' + esc(L.store.delivery) + " · " + esc(L.store.fee) + "</p>" +
@@ -284,10 +289,10 @@
       '<div class="section-label"><strong>' + esc(L.channelsTitle) + "</strong><span>" + esc(L.channelsLead) + "</span></div>" +
       '<div class="channels">' +
       '<button class="channel is-current" type="button" data-action="channel-web">' +
-      '<span class="channel-mark web">' + esc(L.store.mark) + "</span>" +
+      '<span class="channel-mark web"><img src="images/logo-she.png" alt="' + esc(L.store.name) + '"></span>' +
       "<span><strong>" + esc(L.channelWebName) + "</strong><span>" + esc(L.channelWebBody) + "</span><em>" + esc(L.channelWebBadge) + "</em></span></button>" +
-      '<a class="channel" href="' + esc(shopeeUrl(product)) + '" target="_blank" rel="noopener noreferrer">' +
-      '<span class="channel-mark shopee">' + esc(L.channelShopeeName) + "</span>" +
+      '<a class="channel" href="' + esc(shopeeUrl()) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="channel-mark shopee"><img src="images/logo-shopee.jpg" alt="' + esc(L.channelShopeeName) + '"></span>' +
       "<span><strong>" + esc(L.channelShopeeName) + "</strong><span>" + esc(L.channelShopeeBody) + "</span><em>" + esc(L.channelShopeeAction) + "</em></span></a>" +
       "</div><p class=\"aside\">" + esc(L.freshNote) + "</p>"
     );
@@ -342,7 +347,7 @@
     var total = unitTimes(product, pack);
     if (total != null) total *= state.qty;
     var openClass = state.detailOpen || isDesktop() ? " is-open" : "";
-    var dots = [0, 1].map(function (index) {
+    var dots = product.image ? "" : [0, 1].map(function (index) {
       return '<button class="dot' + (state.slide === index ? " is-active" : "") + '" type="button" data-action="slide" data-slide="' + index + '" aria-label="' + esc(L.slides[index]) + '"></button>';
     }).join("");
     return (
@@ -392,7 +397,7 @@
         '<label class="field">' + esc(L.fieldAddress) + '<input id="field-address" value="' + esc(state.form.address) + '" data-field="address"></label>' +
         '<label class="field">' + esc(L.fieldNote) + '<textarea id="field-note" placeholder="' + esc(L.fieldNotePlaceholder) + '" data-field="note">' + esc(state.form.note) + "</textarea></label>" +
         (state.formError ? '<p class="form-error">' + esc(state.formError) + "</p>" : "") +
-        '<button class="primary" type="button" data-action="place">' + esc(L.placeOrder) + "</button>";
+        '<button class="primary" type="button" data-action="place"' + (state.sending ? " disabled" : "") + ">" + esc(state.sending ? L.orderSending : L.placeOrder) + "</button>";
     } else if (!state.cart.length) {
       body = "<h2>" + esc(L.cartTitle) + "</h2><p>" + esc(L.cartEmpty) + "</p>";
     } else {
@@ -511,21 +516,63 @@
       state.checkoutOpen = true;
       state.formError = "";
     } else if (action === "place") {
+      if (state.sending) return;
       var phone = state.form.phone.replace(/\D/g, "");
       if (!state.form.name.trim() || !phone || !state.form.address.trim()) state.formError = L.required;
       else if (!/^\d{9,11}$/.test(phone)) state.formError = L.phoneInvalid;
       else {
         var summary = cartSummary();
-        state.success = state.cart.map(function (line) {
+        var summaryText = state.cart.map(function (line) {
           var name = L.products[line.id].name;
           var packLabel = line.packs ? " · " + L.packs[line.pack] : "";
           return name + packLabel + " × " + line.qty;
         }).join(" · ");
-        if (summary.priced) state.success += " · " + money(summary.sum);
-        state.cart = [];
-        state.cartOpen = false;
-        state.checkoutOpen = false;
-        state.form = { name: "", phone: "", address: "", note: "" };
+        if (summary.priced) summaryText += " · " + money(summary.sum);
+        var payload = {
+          name: state.form.name.trim(),
+          phone: phone,
+          address: state.form.address.trim(),
+          note: state.form.note.trim(),
+          items: state.cart.map(function (line) {
+            var product = productById(line.id);
+            var amount = unitTimes(product, line.pack);
+            return {
+              id: line.id,
+              name: L.products[line.id].name,
+              packLabel: line.packs ? L.packs[line.pack] : "",
+              qty: line.qty,
+              lineText: amount == null ? L.contactPrice : money(amount * line.qty)
+            };
+          }),
+          totalText: summary.priced ? money(summary.sum) : L.contactPrice
+        };
+        var webhook = window.SHE_ORDER && window.SHE_ORDER.webhookUrl;
+        function acceptOrder() {
+          state.sending = false;
+          state.success = summaryText;
+          state.cart = [];
+          state.cartOpen = false;
+          state.checkoutOpen = false;
+          state.form = { name: "", phone: "", address: "", note: "" };
+          render();
+        }
+        if (!webhook) {
+          acceptOrder();
+          return;
+        }
+        state.sending = true;
+        state.formError = "";
+        render();
+        fetch(webhook, {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(payload)
+        }).then(acceptOrder).catch(function () {
+          state.sending = false;
+          state.formError = L.orderSendFailed;
+          render();
+        });
+        return;
       }
     } else if (action === "done") {
       state.success = null;

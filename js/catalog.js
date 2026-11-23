@@ -1,104 +1,112 @@
+/* Tạo bởi npm run generate. Sửa data/gian-hang.xlsx rồi chạy lại, đừng sửa file này. */
 window.SHE_CATALOG = {
-  categories: ["popular", "signature", "discover", "gifts"],
-  products: [
+  "defaultId": "hat-phu-socola-hop-60g",
+  "categories": [
+    "hop-giay",
+    "hu-thuy-tinh",
+    "tui-zip",
+    "hop-chu-nhat",
+    "qua-tang"
+  ],
+  "products": [
     {
-      id: "hat-sen-jar",
-      categories: ["popular", "signature"],
-      price: 137000,
-      packs: true,
-      art: "jar",
-      tone: "lotus",
-      shopeeQuery: "socola hạt sen SHE Chocolate hũ 90g"
+      "id": "hat-phu-socola-hop-60g",
+      "categories": [
+        "hop-giay"
+      ],
+      "price": 99000,
+      "packs": true,
+      "art": "jar",
+      "tone": "lotus",
+      "image": "images/hat-phu-socola-60g.jpg"
     },
     {
-      id: "hat-sen-box",
-      categories: ["popular", "signature"],
-      price: 142000,
-      packs: true,
-      art: "box",
-      tone: "gift",
-      shopeeQuery: "socola hạt sen hộp 90g SHE Chocolate"
+      "id": "hat-phu-socola-hop-120g",
+      "categories": [
+        "hop-giay"
+      ],
+      "price": 189000,
+      "packs": true,
+      "art": "box",
+      "tone": "gift",
+      "image": "images/hat-phu-socola-120g.jpg"
     },
     {
-      id: "coconut",
-      categories: ["popular", "signature"],
-      price: null,
-      packs: true,
-      art: "box",
-      tone: "coconut",
-      shopeeQuery: "sô-cô-la dừa SHE Chocolate"
+      "id": "trai-cay-nhung-socola-hop-60g",
+      "categories": [
+        "hop-giay"
+      ],
+      "price": 95000,
+      "packs": true,
+      "art": "box",
+      "tone": "coconut",
+      "image": "images/trai-cay-nhung-socola-60g.jpg"
     },
     {
-      id: "matcha",
-      categories: ["popular", "signature"],
-      price: null,
-      packs: true,
-      art: "box",
-      tone: "matcha",
-      shopeeQuery: "sô-cô-la hạnh nhân matcha SHE Chocolate"
+      "id": "trai-cay-nhung-socola-hop-120g",
+      "categories": [
+        "hop-giay"
+      ],
+      "price": 179000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/trai-cay-nhung-socola-120g.jpg"
     },
     {
-      id: "fruit",
-      categories: ["popular", "signature"],
-      price: null,
-      packs: true,
-      art: "box",
-      tone: "fruit",
-      shopeeQuery: "trái cây nhúng sô-cô-la SHE Chocolate"
+      "id": "xoai-hu-thuy-tinh-120g",
+      "categories": [
+        "hu-thuy-tinh"
+      ],
+      "price": 155000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/hu-thuy-tinh-xoai-120g.jpg"
     },
     {
-      id: "banana",
-      categories: ["signature"],
-      price: null,
-      packs: true,
-      art: "box",
-      tone: "banana",
-      shopeeQuery: "chuối phủ sô-cô-la SHE Chocolate"
+      "id": "cam-hu-thuy-tinh-100g",
+      "categories": [
+        "hu-thuy-tinh"
+      ],
+      "price": 169000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/hu-thuy-tinh-cam-100g.jpg"
     },
     {
-      id: "cashew",
-      categories: ["discover"],
-      price: null,
-      packs: true,
-      art: "pouch",
-      tone: "cashew",
-      shopeeQuery: "sô-cô-la hạt điều SHE Chocolate 50g"
+      "id": "hat-dieu-hu-thuy-tinh-100g",
+      "categories": [
+        "hu-thuy-tinh"
+      ],
+      "price": 155000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/hu-thuy-tinh-hat-dieu-100g.jpg"
     },
     {
-      id: "macca",
-      categories: ["discover"],
-      price: null,
-      packs: true,
-      art: "pouch",
-      tone: "macca",
-      shopeeQuery: "sô-cô-la macca SHE Chocolate 50g"
+      "id": "macca-hu-thuy-tinh-100g",
+      "categories": [
+        "hu-thuy-tinh"
+      ],
+      "price": 179000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/hu-thuy-tinh-macca-100g.jpg"
     },
     {
-      id: "coffee",
-      categories: ["discover"],
-      price: null,
-      packs: true,
-      art: "pouch",
-      tone: "coffee",
-      shopeeQuery: "sô-cô-la viên cà phê SHE Chocolate 50g"
-    },
-    {
-      id: "moon",
-      categories: ["gifts"],
-      price: 972000,
-      packs: false,
-      art: "box",
-      tone: "moon",
-      shopeeQuery: "bánh trung thu sô-cô-la SHE Chocolate Cung Trăng"
-    },
-    {
-      id: "luxury",
-      categories: ["gifts"],
-      price: 2646000,
-      packs: false,
-      art: "box",
-      tone: "luxury",
-      shopeeQuery: "bánh trung thu sô-cô-la SHE Chocolate Trăng Phú Quý"
+      "id": "hat-sen-hu-thuy-tinh-90g",
+      "categories": [
+        "hu-thuy-tinh"
+      ],
+      "price": 155000,
+      "packs": true,
+      "art": "box",
+      "tone": "matcha",
+      "image": "images/hu-thuy-tinh-hat-sen-90g.jpg"
     }
   ]
 };

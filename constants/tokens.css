@@ -1,8 +1,8 @@
 :root {
-  --color-brand: #00b14f;
-  --color-brand-pressed: #009443;
-  --color-brand-soft: #e7f8ee;
-  --color-brand-ink: #087a38;
+  --color-brand: #41190f;
+  --color-brand-pressed: #31130b;
+  --color-brand-soft: #f4ece8;
+  --color-brand-ink: #41190f;
   --color-canvas: #f3f3f3;
   --color-surface: #ffffff;
   --color-ink: #1a1a1a;
@@ -21,11 +21,11 @@
   --color-shadow: rgba(0, 0, 0, 0.08);
   --color-stage: #f3ead7;
   --color-stage-deep: #e7d7b8;
-  --color-cocoa: #4a2c22;
-  --color-cocoa-deep: #2b1812;
+  --color-cocoa: #41190f;
+  --color-cocoa-deep: #31130b;
   --color-cream: #f7f1e6;
   --color-gold: #c6a15b;
-  --color-success-soft: #e7f8ee;
+  --color-success-soft: #f4ece8;
 
   --color-tone-lotus-body: #8c4a32;
   --color-tone-lotus-lid: #f3e6d4;

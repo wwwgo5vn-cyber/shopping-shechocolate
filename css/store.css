@@ -133,18 +133,30 @@ svg {
 }
 
 .logo {
-  width: 64px;
-  height: 64px;
-  margin-top: -32px;
-  border-radius: 18px;
+  width: 168px;
+  height: 56px;
+  margin-top: -28px;
+  border-radius: var(--radius-md);
   border: 3px solid var(--color-surface);
-  background: var(--color-cocoa-deep);
-  color: var(--color-cream);
+  background: var(--color-surface);
   display: grid;
   place-items: center;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  font-size: 13px;
+  padding: var(--space-4) var(--space-8);
+  overflow: hidden;
+}
+
+.brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-logo-on-bar {
+  width: auto;
+  height: 28px;
+  max-width: 132px;
+  filter: brightness(0) invert(1);
 }
 
 .store-name {
@@ -277,9 +289,17 @@ svg {
 }
 
 .thumb svg,
-.stage svg {
+.thumb img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+}
+
+.stage svg,
+.stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .plus {
@@ -344,7 +364,9 @@ svg {
 .stage {
   background: linear-gradient(180deg, var(--color-stage) 0%, var(--color-stage-deep) 100%);
   border-radius: var(--radius-md);
-  height: 280px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
   overflow: hidden;
 }
 
@@ -558,11 +580,28 @@ svg {
 }
 
 .channel-mark.web {
+  padding: var(--space-4);
+  overflow: hidden;
   background: var(--color-brand);
 }
 
+.channel-mark.web img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
 .channel-mark.shopee {
-  background: var(--color-channel-shopee);
+  background: var(--color-surface);
+  padding: 0;
+  overflow: hidden;
+}
+
+.channel-mark.shopee img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .channel strong,
@@ -675,7 +714,14 @@ svg {
 
 .rec .thumb {
   width: 100%;
-  height: 96px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+}
+
+.rec .thumb img,
+.rec .thumb svg {
+  display: block;
+  object-fit: contain;
 }
 
 .rec strong {
@@ -975,13 +1021,9 @@ svg {
 
   .detail-hero {
     display: grid;
-    grid-template-columns: 240px minmax(0, 1fr);
+    grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
     gap: 24px;
     align-items: start;
-  }
-
-  .stage {
-    height: 320px;
   }
 
   .sticky-buy {
