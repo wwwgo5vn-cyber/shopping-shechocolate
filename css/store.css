@@ -159,6 +159,40 @@ svg {
   filter: brightness(0) invert(1);
 }
 
+.brand-mark {
+  color: var(--color-brand-ink);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+}
+
+.brand-mark-on-bar {
+  color: var(--color-inverse);
+  font-size: 16px;
+  line-height: 28px;
+}
+
+.maps-link {
+  color: var(--color-brand-ink);
+  font-weight: 700;
+}
+
+.near-btn {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-8);
+  border: 1px solid var(--color-brand);
+  background: var(--color-brand-soft);
+  color: var(--color-brand-ink);
+  border-radius: var(--radius-pill);
+  padding: var(--space-8) var(--space-16);
+  font-weight: 700;
+}
+
+.near-btn:disabled {
+  opacity: 0.7;
+}
+
 .store-name {
   margin: var(--space-8) 0 0;
   font-size: 22px;

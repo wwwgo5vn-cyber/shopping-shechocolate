@@ -30,7 +30,10 @@ var LIMITS = {
     detailPickupTitle: 40,
     detailPickupBody: 80,
     detailServiceTitle: 40,
-    detailServiceBody: 24
+    detailServiceBody: 24,
+    maps: 300,
+    vi_do: 20,
+    kinh_do: 20
   },
   faq: {
     question: 120,
@@ -49,10 +52,28 @@ var LIMITS = {
     ingredientLines: 6,
     ingredientLine: 120,
     specLines: 6,
-    specLine: 80
+    specLine: 80,
+    maxStores: 12
+  },
+  outlet: {
+    id: 32,
+    name: 60,
+    area: 60,
+    maps: 300,
+    max: 30
   },
   arts: ["jar", "box", "pouch"],
-  tones: ["lotus", "gift", "coconut", "banana", "matcha", "cashew", "macca", "coffee", "fruit", "moon", "luxury"]
+  tones: ["lotus", "gift", "coconut", "banana", "matcha", "cashew", "macca", "coffee", "fruit", "moon", "luxury"],
+  martTags: ["food", "drink", "spice", "beauty", "fashion", "handicraft", "health", "experience"],
+  mart: {
+    id: 32,
+    name: 60,
+    area: 60,
+    summary: 140,
+    maps: 300,
+    file: 80,
+    maxTags: 4
+  }
 };
 
 var STORE_FIELDS = [
@@ -81,6 +102,12 @@ var STORE_FIELDS = [
   ["detailServiceBody", "Trang chi tiết, chăm sóc khách hàng, số điện thoại"]
 ];
 
+var PLACE_FIELDS = [
+  ["maps", "Link Google Maps của đúng cửa hàng này"],
+  ["vi_do", "Vĩ độ"],
+  ["kinh_do", "Kinh độ"]
+];
+
 var PRODUCT_COLUMNS = [
   ["ma", "Mã", "Tối đa 32 ký tự. Chữ thường, số, dấu gạch ngang. Ví dụ hat-sen-hu. Không sửa mã khi món đã có đơn."],
   ["ten", "Tên", "Tối đa 80 ký tự. Hiện ở menu và tiêu đề chi tiết."],
@@ -94,7 +121,31 @@ var PRODUCT_COLUMNS = [
   ["thanh_phan", "Thành phần", "Tối đa 6 dòng, mỗi dòng tối đa 120 ký tự. Xuống dòng trong ô để tách ý."],
   ["quy_cach", "Quy cách", "Tối đa 6 dòng, mỗi dòng tối đa 80 ký tự. Xuống dòng trong ô để tách ý."],
   ["kieu_hinh", "Kiểu hình minh họa", "Khi chưa có ảnh: jar, box hoặc pouch."],
-  ["mau", "Màu minh họa", "Khi chưa có ảnh: lotus, gift, coconut, banana, matcha, cashew, macca, coffee, fruit, moon, luxury."]
+  ["mau", "Màu minh họa", "Khi chưa có ảnh: lotus, gift, coconut, banana, matcha, cashew, macca, coffee, fruit, moon, luxury."],
+  ["ban_tai", "Bán tại", "Mã ở sheet Điểm bán, cách nhau bởi dấu phẩy. Ví dụ xuong, cua-hang-bien. Tối đa 12 mã. Để trống nếu món chỉ giao tận nơi."]
+];
+
+var OUTLET_COLUMNS = [
+  ["ma", "Mã", "Tối đa 32 ký tự. Chữ thường, số, gạch ngang. Điền mã này vào cột Bán tại của sản phẩm."],
+  ["ten", "Tên", "Tối đa 60 ký tự. Tên hiện cạnh nút cửa hàng trong trang sản phẩm."],
+  ["khu_vuc", "Khu vực", "Tối đa 60 ký tự. Ví dụ Hải Châu, Đà Nẵng. Để trống nếu chưa có."],
+  ["maps", "Google Maps", "Link https dẫn đường. Tối đa 300 ký tự. Nếu link có @vĩ,kinh thì trang tự lấy tọa độ."],
+  ["vi_do", "Vĩ độ", "Số thập phân, ví dụ 16.0544. Chuột phải vào ghim Google Maps rồi chép tọa độ. Để trống nếu link đã có tọa độ."],
+  ["kinh_do", "Kinh độ", "Số thập phân, ví dụ 108.2022. Đi cùng vĩ độ."]
+];
+
+var MART_COLUMNS = [
+  ["ma", "Mã", "Tối đa 32 ký tự. Chữ thường, số, gạch ngang. Đây là đoạn sau dấu / . Ví dụ she-chocolate mở tại /she-chocolate/."],
+  ["ten", "Tên", "Tối đa 60 ký tự. Tên hiện trên thẻ cửa hàng."],
+  ["khu_vuc", "Khu vực", "Tối đa 60 ký tự. Ví dụ Hải Châu, Đà Nẵng."],
+  ["mo_ta", "Mô tả", "Tối đa 140 ký tự. Một câu dưới tên cửa hàng."],
+  ["danh_muc", "Danh mục", "Một hoặc nhiều tag, cách nhau bởi dấu phẩy. Chỉ dùng: food, drink, spice, beauty, fashion, handicraft, health, experience. Tối đa 4 tag."],
+  ["gian_hang", "Có gian hàng", "Chỉ điền có hoặc không. có = hiện nút Vào gian hàng."],
+  ["maps", "Google Maps", "Link https dẫn đường. Để trống nếu chưa có. Tối đa 300 ký tự. Nếu link có tọa độ @vĩ,kinh thì trang tự lấy."],
+  ["vi_do", "Vĩ độ", "Số thập phân, ví dụ 16.0544. Chuột phải vào ghim Google Maps rồi chép tọa độ. Để trống nếu chưa có."],
+  ["kinh_do", "Kinh độ", "Số thập phân, ví dụ 108.2022. Đi cùng vĩ độ. Dùng để xếp cửa hàng gần khách lên trước."],
+  ["du_lieu", "File dữ liệu gian hàng", "Chỉ khi Có gian hàng = có. Đường dẫn trong source, ví dụ constants/generated-store.js. Để trống thì dùng stores/mã/generated-store.js."],
+  ["catalog", "File catalog", "Chỉ khi Có gian hàng = có. Ví dụ js/catalog.js. Để trống thì dùng stores/mã/catalog.js."]
 ];
 
 function chars(value) {
@@ -113,7 +164,10 @@ function linesOf(value) {
 module.exports = {
   LIMITS: LIMITS,
   STORE_FIELDS: STORE_FIELDS,
+  PLACE_FIELDS: PLACE_FIELDS,
   PRODUCT_COLUMNS: PRODUCT_COLUMNS,
+  OUTLET_COLUMNS: OUTLET_COLUMNS,
+  MART_COLUMNS: MART_COLUMNS,
   chars: chars,
   linesOf: linesOf
 };

@@ -75,6 +75,7 @@ async function main() {
     ["Ảnh mẫu", "Các file jpg đang có trong images là nền màu 800 × 800 để thử generator. Thay bằng ảnh sản phẩm thật, giữ đúng tên file hoặc sửa cột Ảnh."],
     ["Link Shopee", "Một link cho cả gian hàng, điền ở sheet Cửa hàng, mã link_shopee. Mọi nút Shopee trên web mở đúng link đó."],
     ["Trang chi tiết", "Dòng còn hàng, giao nhanh, nhận tại xưởng và hotline sửa ở sheet Cửa hàng, các mã bắt đầu bằng detail. Câu hỏi thường gặp sửa ở sheet Câu hỏi: một dòng một câu, cột Câu hỏi và cột Trả lời."],
+    ["Điểm bán", "Sheet Điểm bán là từng cửa hàng khách có thể đến mua. Cột Bán tại ở sheet Sản phẩm ghi mã những cửa hàng đang bán SKU đó, cách nhau bởi dấu phẩy. Ô trống = món chỉ giao tận nơi. Vĩ độ và kinh độ giúp xếp cửa hàng gần khách lên trước."],
     ["Giá", "Số nguyên, không chấm nghìn. 137000 nghĩa là 137.000₫. Ô trống = trang hiện Liên hệ."],
     ["Gói 1-3-6", "Cột Bán 1-3-6 gói chỉ nhận có hoặc không."],
     ["Thành phần và quy cách", "Muốn nhiều ý thì bấm Alt+Enter trong ô. Mỗi ý một dòng, trong giới hạn ghi ở dòng GHI_CHU."],
@@ -123,6 +124,14 @@ async function main() {
     products.addRow(limits.PRODUCT_COLUMNS.map(function (column) { return product[column[0]]; }));
   });
   products.views = [{ state: "frozen", ySplit: 2 }];
+
+  var outlets = workbook.addWorksheet("Điểm bán");
+  outlets.columns = limits.OUTLET_COLUMNS.map(function (column) {
+    return { width: column[0] === "maps" ? 46 : 28 };
+  });
+  headerRow(outlets, limits.OUTLET_COLUMNS.map(function (column) { return column[1]; }));
+  noteRow(outlets, ["GHI_CHU"].concat(limits.OUTLET_COLUMNS.slice(1).map(function (column) { return column[2]; })));
+  outlets.views = [{ state: "frozen", ySplit: 2 }];
 
   var faq = workbook.addWorksheet("Câu hỏi");
   faq.columns = [{ width: 52 }, { width: 88 }, { width: 42 }];

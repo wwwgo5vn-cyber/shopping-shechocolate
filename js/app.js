@@ -4,7 +4,7 @@
   var app = document.getElementById("app");
   var desktopQuery = window.matchMedia("(min-width: 960px)");
 
-  document.title = L.metaTitle;
+  document.title = isPlaceShop() ? L.store.name + " — " + L.placeMetaSuffix : L.metaTitle;
   var theme = document.querySelector('meta[name="theme-color"]');
   if (theme) {
     theme.content = getComputedStyle(document.documentElement).getPropertyValue("--color-brand").trim();
@@ -29,7 +29,10 @@
     form: { name: "", phone: "", address: "", note: "" },
     formError: "",
     sending: false,
-    keepDetailScroll: false
+    keepDetailScroll: false,
+    locating: false,
+    userPos: null,
+    locationNote: ""
   };
 
   function esc(value) {
@@ -198,15 +201,148 @@
     }, 1600);
   }
 
-  function shopeeUrl() {
-    return window.SHE_ORDER && window.SHE_ORDER.shopeeUrl ? window.SHE_ORDER.shopeeUrl : "";
+  function isPlaceShop() {
+    return window.SHE_ORDER && window.SHE_ORDER.mode === "place";
+  }
+
+  function brandLogo(onBar) {
+    if (isPlaceShop()) {
+      return '<span class="brand-mark' + (onBar ? " brand-mark-on-bar" : "") + '">' + esc(L.store.mark) + "</span>";
+    }
+    return '<img class="brand-logo' + (onBar ? " brand-logo-on-bar" : "") + '" src="images/logo-she.png" alt="' + esc(L.store.name) + '">';
+  }
+
+  function mapsLink() {
+    var place = window.VISIT_PLACE;
+    var labels = window.VISIT_LABELS;
+    if (!place || !place.mapsUrl || !labels) return "";
+    return '<p class="muted"><a class="maps-link" href="' + esc(place.mapsUrl) + '" target="_blank" rel="noopener noreferrer">' + esc(labels.directions) + "</a></p>";
+  }
+
+  function distanceMeters(from, to) {
+    var earth = 6371000;
+    var lat1 = from.lat * Math.PI / 180;
+    var lat2 = to.lat * Math.PI / 180;
+    var dLat = (to.lat - from.lat) * Math.PI / 180;
+    var dLng = (to.lng - from.lng) * Math.PI / 180;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * earth * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function formatDistance(meters) {
+    if (meters < 1000) return Math.round(meters) + " " + L.meterUnit;
+    return new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(meters / 1000) + " " + L.kmUnit;
+  }
+
+  function pickupPlaces(product) {
+    var wanted = {};
+    (product.stores || []).forEach(function (id) { wanted[id] = true; });
+    var order = product.stores || [];
+    return (window.SHE_STORES || []).filter(function (place) {
+      return wanted[place.id] && (place.mapsUrl || (place.lat != null && place.lng != null));
+    }).map(function (place) {
+      var copy = {
+        id: place.id,
+        name: place.name,
+        area: place.area,
+        mapsUrl: place.mapsUrl || "",
+        lat: place.lat,
+        lng: place.lng,
+        meters: null
+      };
+      if (state.userPos && place.lat != null && place.lng != null) copy.meters = distanceMeters(state.userPos, place);
+      return copy;
+    }).sort(function (a, b) {
+      if (state.userPos && (a.meters != null || b.meters != null)) {
+        if (a.meters == null) return 1;
+        if (b.meters == null) return -1;
+        return a.meters - b.meters;
+      }
+      return order.indexOf(a.id) - order.indexOf(b.id);
+    });
+  }
+
+  function storeHref(place) {
+    if (state.userPos && place.lat != null && place.lng != null) {
+      return "https://www.google.com/maps/dir/?api=1&origin=" + state.userPos.lat + "," + state.userPos.lng + "&destination=" + place.lat + "," + place.lng;
+    }
+    if (place.mapsUrl) return place.mapsUrl;
+    return "https://www.google.com/maps/search/?api=1&query=" + place.lat + "," + place.lng;
+  }
+
+  function placeHref() {
+    var place = window.SHE_PLACE || {};
+    if (state.userPos && place.lat != null && place.lng != null) {
+      return "https://www.google.com/maps/dir/?api=1&origin=" + state.userPos.lat + "," + state.userPos.lng + "&destination=" + place.lat + "," + place.lng;
+    }
+    if (place.mapsUrl) return place.mapsUrl;
+    if (place.lat != null && place.lng != null) {
+      return "https://www.google.com/maps/search/?api=1&query=" + place.lat + "," + place.lng;
+    }
+    return "";
+  }
+
+  function renderPlaceChannels() {
+    var href = placeHref();
+    var directions = window.VISIT_LABELS ? window.VISIT_LABELS.directions : "";
+    var body =
+      '<span class="channel-mark web"><span>' + esc(L.store.mark) + "</span></span>" +
+      "<span><strong>" + esc(L.pickupTitle) + "</strong><span>" + esc(L.pickupBody) + "</span>" +
+      (href ? "<em>" + esc(directions) + "</em>" : "") + "</span>";
+    var place = href
+      ? '<a class="channel" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + body + "</a>"
+      : '<div class="channel">' + body + "</div>";
+    return (
+      '<div class="section-label"><strong>' + esc(L.channelsTitle) + "</strong><span>" + esc(L.placeChannelsLead) + "</span></div>" +
+      '<div class="channels">' +
+      '<button class="channel is-current" type="button" data-action="channel-web">' +
+      '<span class="channel-mark web"><span>' + esc(L.store.mark) + "</span></span>" +
+      "<span><strong>" + esc(L.channelWebName) + "</strong><span>" + esc(L.channelWebBody) + "</span><em>" + esc(L.channelWebBadge) + "</em></span></button>" +
+      place +
+      "</div><p class=\"aside\">" + esc(L.placeFreshNote) + "</p>"
+    );
+  }
+
+  function renderChannels(product) {
+    if (isPlaceShop()) return renderPlaceChannels();
+    var places = pickupPlaces(product);
+    var stores = places.length
+      ? places.map(function (place, index) {
+          var detail = esc(place.name);
+          if (place.area) detail += " · " + esc(place.area);
+          if (place.meters != null) detail += " · " + esc(L.distancePrefix) + " " + esc(formatDistance(place.meters));
+          return (
+            '<a class="channel" href="' + esc(storeHref(place)) + '" target="_blank" rel="noopener noreferrer">' +
+            '<span class="channel-mark web"><span>' + (index + 1) + "</span></span>" +
+            "<span><strong>" + esc(L.storeSlot.replace("{n}", String(index + 1))) + "</strong><span>" + detail + "</span><em>" + esc(window.VISIT_LABELS ? window.VISIT_LABELS.directions : "") + "</em></span></a>"
+          );
+        }).join("")
+      : '<p class="aside">' + esc(L.noStores) + "</p>";
+    var near = state.locating ? L.locating : L.nearMe;
+    return (
+      '<div class="section-label"><strong>' + esc(L.channelsTitle) + "</strong><span>" + esc(L.channelsLead) + "</span></div>" +
+      '<div class="channels">' +
+      '<button class="channel is-current" type="button" data-action="channel-web">' +
+      '<span class="channel-mark web">' + (isPlaceShop() ? "<span>" + esc(L.store.mark) + "</span>" : '<img src="images/logo-she.png" alt="' + esc(L.store.name) + '">') + "</span>" +
+      "<span><strong>" + esc(L.channelWebName) + "</strong><span>" + esc(L.channelWebBody) + "</span><em>" + esc(L.channelWebBadge) + "</em></span></button>" +
+      stores +
+      "</div>" +
+      (places.length
+        ? '<button class="near-btn" type="button" data-action="near"' + (state.locating ? " disabled" : "") + ">" + esc(near) + "</button>"
+        : "") +
+      (state.locationNote ? '<p class="aside">' + esc(state.locationNote) + "</p>" : "") +
+      (state.userPos && places.length && !places.some(function (place) { return place.meters != null; })
+        ? '<p class="aside">' + esc(L.locationNoCoords) + "</p>"
+        : "") +
+      '<p class="aside">' + esc(L.freshNote) + "</p>"
+    );
   }
 
   function renderHeader() {
     var count = cartCount();
     var search = state.searchOpen
       ? '<input id="search" class="search-input" type="search" placeholder="' + esc(L.header.searchPlaceholder) + '" value="' + esc(state.query) + '" />'
-      : '<h1 class="topbar-title"><img class="brand-logo brand-logo-on-bar" src="images/logo-she.png" alt="' + esc(L.store.name) + '"></h1>';
+      : '<h1 class="topbar-title">' + brandLogo(true) + "</h1>";
     return (
       '<header class="topbar">' +
       '<button class="icon-btn" type="button" data-action="back" aria-label="' + esc(L.header.back) + '">' + icon("back") + "</button>" +
@@ -221,11 +357,12 @@
   function renderStore() {
     return (
       '<div class="cover"></div><section class="store-card">' +
-      '<div class="logo"><img class="brand-logo" src="images/logo-she.png" alt="' + esc(L.store.name) + '"></div>' +
+      '<div class="logo">' + brandLogo(false) + "</div>" +
       "<h2 class=\"store-name\">" + esc(L.store.name) + "</h2>" +
       '<p class="muted">' + esc(L.store.kind) + " · " + esc(L.store.area) + "</p>" +
       '<p class="muted">' + esc(L.store.delivery) + " · " + esc(L.store.fee) + "</p>" +
       '<p class="muted">' + esc(L.store.hours) + "</p>" +
+      mapsLink() +
       '<div class="promos">' +
       '<div class="promo"><strong>' + esc(L.store.promoShipTitle) + "</strong><span>" + esc(L.store.promoShipBody) + "</span></div>" +
       '<div class="promo"><strong>' + esc(L.store.promoPackTitle) + "</strong><span>" + esc(L.store.promoPackBody) + "</span></div>" +
@@ -281,20 +418,6 @@
       '<div class="fact">' + icon("pin") + "<p><strong>" + esc(L.pickupTitle) + "</strong><br><small>" + esc(L.pickupBody) + "</small></p><span></span></div>" +
       '<div class="fact">' + icon("phone") + "<p><strong>" + esc(L.serviceTitle) + "</strong><br><small>" + esc(L.serviceBody) + "</small></p><span></span></div>" +
       "</div>"
-    );
-  }
-
-  function renderChannels(product) {
-    return (
-      '<div class="section-label"><strong>' + esc(L.channelsTitle) + "</strong><span>" + esc(L.channelsLead) + "</span></div>" +
-      '<div class="channels">' +
-      '<button class="channel is-current" type="button" data-action="channel-web">' +
-      '<span class="channel-mark web"><img src="images/logo-she.png" alt="' + esc(L.store.name) + '"></span>' +
-      "<span><strong>" + esc(L.channelWebName) + "</strong><span>" + esc(L.channelWebBody) + "</span><em>" + esc(L.channelWebBadge) + "</em></span></button>" +
-      '<a class="channel" href="' + esc(shopeeUrl()) + '" target="_blank" rel="noopener noreferrer">' +
-      '<span class="channel-mark shopee"><img src="images/logo-shopee.jpg" alt="' + esc(L.channelShopeeName) + '"></span>' +
-      "<span><strong>" + esc(L.channelShopeeName) + "</strong><span>" + esc(L.channelShopeeBody) + "</span><em>" + esc(L.channelShopeeAction) + "</em></span></a>" +
-      "</div><p class=\"aside\">" + esc(L.freshNote) + "</p>"
     );
   }
 
@@ -365,10 +488,11 @@
       '<div class="sticky-buy"><button class="add-btn" type="button" data-action="add"><span>' + esc(L.addToCart) + "</span><span>" + esc(money(total)) + "</span></button></div>" +
       "</div></div>" +
       renderFacts() + renderChannels(product) +
-      '<div class="section-label"><strong>' + esc(L.pillarsTitle) + "</strong></div>" +
-      '<div class="pillars">' + L.pillars.map(function (item) {
-        return '<article class="pillar"><h3>' + esc(item.title) + "</h3><p>" + esc(item.body) + "</p></article>";
-      }).join("") + "</div>" +
+      (isPlaceShop() ? "" :
+        '<div class="section-label"><strong>' + esc(L.pillarsTitle) + "</strong></div>" +
+        '<div class="pillars">' + L.pillars.map(function (item) {
+          return '<article class="pillar"><h3>' + esc(item.title) + "</h3><p>" + esc(item.body) + "</p></article>";
+        }).join("") + "</div>") +
       renderAccordion(copy) + renderRecommend(product) + "</div></section>"
     );
   }
@@ -470,6 +594,10 @@
       else if (state.searchOpen) {
         state.searchOpen = false;
         state.query = "";
+      } else {
+        var from = new URLSearchParams(window.location.search).get("from");
+        window.location.href = from === "home" ? "/" : "/marts.html";
+        return;
       }
     } else if (action === "search") {
       state.searchOpen = !state.searchOpen;
@@ -496,6 +624,24 @@
       var packs = document.getElementById("packs") || document.querySelector(".add-btn");
       if (packs) packs.scrollIntoView({ block: "center", behavior: "smooth" });
       return;
+    } else if (action === "near") {
+      if (state.locating) return;
+      if (!navigator.geolocation) {
+        state.locationNote = L.locationDenied;
+      } else {
+        state.locating = true;
+        state.locationNote = "";
+        navigator.geolocation.getCurrentPosition(function (position) {
+          state.locating = false;
+          state.userPos = { lat: position.coords.latitude, lng: position.coords.longitude };
+          state.locationNote = "";
+          render();
+        }, function () {
+          state.locating = false;
+          state.locationNote = L.locationDenied;
+          render();
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+      }
     } else if (action === "accordion") {
       var id = target.getAttribute("data-id");
       state.accordion = state.accordion === id ? "" : id;

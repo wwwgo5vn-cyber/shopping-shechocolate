@@ -3,7 +3,12 @@
   "private": true,
   "scripts": {
     "template": "node scripts/create-template.js",
-    "generate": "node scripts/generate.js"
+    "generate": "node scripts/generate.js",
+    "paths": "node scripts/write-store-pages.js",
+    "marts-template": "node scripts/create-marts-template.js",
+    "marts": "node scripts/generate-marts.js",
+    "shop-template": "node scripts/create-shop-template.js",
+    "shop": "node scripts/generate.js"
   },
   "dependencies": {
     "exceljs": "^4.4.0",

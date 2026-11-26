@@ -204,5 +204,6 @@ window.SHE_LABELS.faq = [
 ];
 window.SHE_ORDER = {
   "webhookUrl": "",
-  "shopeeUrl": "https://shopee.vn/she_chocolate"
+  "shopeeUrl": "https://shopee.vn/she_chocolate",
+  "mode": "outlets"
 };

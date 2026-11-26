@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script>
+      var params = new URLSearchParams(window.location.search);
+      var id = params.get("store") || "she-chocolate";
+      params.delete("store");
+      var query = params.toString();
+      window.location.replace("/" + encodeURIComponent(id) + "/" + (query ? "?" + query : ""));
+    </script>
+  </head>
+  <body></body>
+</html>
